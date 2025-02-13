@@ -34,3 +34,6 @@ newdf3 <- zdf[26,]
 #new dataframe to only include values for zsquared(3rd column) on 180th row 
 newdf4 <- data.frame(zdf[180,3])
 
+getwd()
+read.csv("/Users/oliviabrown/Desktop/TipsR.csv", na.strings=".")
+
