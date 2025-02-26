@@ -1,0 +1,60 @@
+---
+title: "PLPA homework"
+author: "Olivia Brown"
+date: "2025-02-26"
+output: 
+  html_document:
+  md_document:
+    variant: gfm
+  word_document:
+  pdf_document: 
+    toc: true
+    toc_float: true 
+---
+R code example 
+```{r, R code example, include=FALSE, echo=TRUE}
+#we can use this as a regular R doc 
+#include shows code chunk if true and not if false, echo shows output if true and not if false
+summary(mtcars)
+```
+
+include figures
+```{r}
+library(ggplot2)
+data("mtcars")
+ggplot(mtcars, aes(x= wt, y = mpg)) + geom_point()
+```
+
+R markdown formatting options
+#first level header
+
+*this is in italics*
+**this is bold**
+example text
+
+- one item
+- another item
+ - subitem
+ 
+ 1. one 
+ 2. two
+
+## second level header 
+#### subheader
+
+### third level header
+
+#### Links 
+
+[link to my github](https://github.com/olixiabrown/PLPA5820)
+
+## Images
+
+![image name](imagename.jpg)
+
+##formatted tables
+```{r}
+library(knitr)
+kable(mtcars, digits = 3, format = "markdown")
+```
+
