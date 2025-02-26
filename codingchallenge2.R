@@ -17,8 +17,8 @@ ggplot(mycotoxindata, aes(x = Treatment, y = DON, color = Cultivar)) +
 
 #Q3 -- bar chart with SE bars 
 ggplot(mycotoxindata, aes(x = Treatment, y = DON, color = Cultivar, fill = Cultivar)) + 
-  stat_summary(fun = mean, geom="bar") +
-  stat_summary(fun.data = mean_se, geom = "errorbar") + 
+  stat_summary(fun = mean, geom="bar", position = "dodge") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", position = "dodge") + 
   xlab("") + 
   ylab("DON (ppm)")
 
