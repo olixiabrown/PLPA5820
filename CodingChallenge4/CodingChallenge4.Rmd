@@ -1,0 +1,103 @@
+---
+title: "Coding Challenge 4"
+author: "Olivia Brown"
+date: "2025-02-27"
+output:
+  md_document:
+    variant: gfm
+
+---
+# Manuscript Link
+[Link to manuscript](https://doi.org/10.1094/PDIS-06-21-1253-RE) 
+
+# Packages, Color Palette, and Data Prep
+```{r, warning = FALSE, message = FALSE }
+
+library(knitr)
+library(rmarkdown)
+library(pandoc)
+library(tinytex)
+library(ggplot2)
+library(ggpubr)
+
+#read in data
+mycotoxindata <- read.csv(PLPA5820.Rproj/CodingChallenge4/"MycotoxinData.csv", na.strings="na")
+
+#change treatment from chr to factor
+mycotoxindata$Treatment <- as.factor(mycotoxindata$Treatment)
+
+#reorder the levels using factor()
+mycotoxindata$Treatment <- factor(mycotoxindata$Treatment, levels = c("NTC", "Fg", "Fg + 37", "Fg + 40", "Fg + 70"))
+
+#add colorblind palette
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442",
+                "#0072B2", "#D55E00", "#CC79A7")
+```
+
+
+# GGPlots
+```{r, warning = FALSE}
+
+#DON GGplot
+Q1Plot <- ggplot(mycotoxindata, aes(x = Treatment, y = DON, fill= Cultivar, color = Cultivar)) + 
+  geom_boxplot(position = position_dodge()) +
+  geom_point(position = position_jitterdodge(0.09), alpha=0.6, shape = 21, colour = "black")+
+  xlab("") + ylab("DON (ppm)") +
+  scale_fill_manual(values = c("Ambassador" = "#0072B2", "Wheaton" = "#D55E00")) + 
+  scale_color_manual(values = c("Ambassador" = "#0072B2", "Wheaton" = "#D55E00")) +
+  theme_classic()+
+  facet_wrap(~Cultivar)
+Q1Plot
+
+#X15ADON GGplot
+Q3Plot <- ggplot(mycotoxindata, aes(x = Treatment, y = X15ADON, fill= Cultivar, color = Cultivar)) + 
+  geom_boxplot(position = position_dodge()) +
+  geom_point(position = position_jitterdodge(0.05), alpha=0.6, shape = 21, colour = "black")+
+  xlab("") + ylab("15ADON") +
+  scale_fill_manual(values = c("Ambassador" = "#0072B2", "Wheaton" = "#D55E00")) + 
+  scale_color_manual(values = c("Ambassador" = "#0072B2", "Wheaton" = "#D55E00")) +
+  theme_classic()+
+  facet_wrap(~Cultivar)
+Q3Plot
+
+#Mass per Seed GGplot
+Q3Plot_PT2 <- ggplot(mycotoxindata, aes(x = Treatment, y = MassperSeed_mg, fill= Cultivar, color = Cultivar)) + 
+  geom_boxplot(position = position_dodge()) +
+  geom_point(position = position_jitterdodge(0.05), alpha=0.6, shape = 21, colour = "black")+
+  xlab("") + ylab("Seed Mass (mg)") +
+  scale_fill_manual(values = c("Ambassador" = "#0072B2", "Wheaton" = "#D55E00")) + 
+  scale_color_manual(values = c("Ambassador" = "#0072B2", "Wheaton" = "#D55E00")) +
+  theme_classic()+
+  facet_wrap(~Cultivar)
+Q3Plot_PT2
+
+```
+
+# DON T test
+```{r, warning = FALSE}
+Q1Plot_TTEST <- Q1Plot+ 
+  geom_pwc(aes(group = Treatment), method = "t.test", label = "p.adj.format")
+Q1Plot_TTEST
+```
+
+# X15ADON T test
+```{r, warning = FALSE}
+Q3Plot_TTEST <- Q3Plot +
+  geom_pwc(aes(group = Treatment), method = "t.test", label = "p.adj.format")
+Q3Plot_TTEST
+```
+
+# Mass Per Seed T test
+```{r, warning = FALSE}
+Q3Plot_PT2_TTEST <- Q3Plot_PT2 +
+  geom_pwc(aes(group = Treatment), method = "t.test", label = "p.adj.format")
+Q3Plot_PT2_TTEST
+```
+
+# Combine T Tests
+```{r, warning = FALSE}
+figure2<- ggarrange(
+  Q1Plot_TTEST, Q3Plot_TTEST, Q3Plot_PT2_TTEST, labels = "AUTO", nrow = 1, ncol = 3, common.legend = T)
+figure2
+```
+
