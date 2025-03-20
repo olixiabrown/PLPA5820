@@ -1,0 +1,73 @@
+---
+title: "Coding Challenge 5 - Data Wrangling"
+author: "Olivia Brown"
+date: "2025-03-20"
+output: word_document
+editor_options: 
+  chunk_output_type: console
+---
+[Link to Github](https://github.com/olixiabrown/PLPA5820) 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### Q1 - load in required packages and dataframe
+```{r}
+library(tidyverse)
+getwd()
+metadata <- read.csv("CodingChallenge5/Metadata.csv")
+diversitydata <- read.csv("CodingChallenge5/DiversityData.csv")
+
+```
+
+#### Q2 - join dataframes by code column
+```{r}
+head(metadata)
+head(diversitydata)
+
+alpha <- full_join(metadata, diversitydata, by = "Code")
+```
+
+#### Q3 - create alpha_even dataframe that includes pielou's evenness index
+```{r}
+#calculate log richness
+alpha <- mutate(alpha, logRich = log(richness))
+head(alpha)
+#calculate PEI and create a new df with PEI
+alphaeven <- mutate(alpha, PEI = (shannon/logRich))
+```
+
+#### Q4 - find mean and SE using pipes
+```{r}
+
+alpha_average <- alphaeven %>%
+  group_by(Crop, Time_Point) %>% 
+  summarise(Mean.PEI = mean(PEI),
+            n = n(), 
+            sd.dev = sd(PEI),
+            std.err = sd.dev/sqrt(n))
+
+```
+
+
+#### Q5 - reshape data by crop
+```{r}
+
+alpha_average2 <- alpha_average %>%
+  select(Time_Point, Crop, Mean.PEI) %>%
+  pivot_wider(names_from = Crop, values_from = Mean.PEI) %>%
+   mutate(diff.cotton.even = Soil -Cotton) %>%
+  mutate(diff.soybean.even = Soil - Soybean)
+```
+
+#### Q6 - reshape to long and make a ggplot
+```{r}
+
+alpha_average2 %>%
+  select(Time_Point, diff.cotton.even, diff.soybean.even) %>%
+  pivot_longer(c(diff.cotton.even, diff.soybean.even), names_to="diff")%>%
+  ggplot(aes(x=Time_Point, y=value, color=diff))+
+           geom_line()+
+  xlab("Time (hrs)")+ylab("Difference from soil in Pielou's evenness")
+```
