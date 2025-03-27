@@ -1,0 +1,52 @@
+---
+title: "Coding Challenge 6"
+author: "Olivia Brown"
+date: "2025-03-27"
+output: word_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Q3 - Read in dataframe
+```{r}
+getwd()
+setwd("/Users/oliviabrown/Desktop/R directories and code/PLPA5820/Coding Challenge 6")
+cities<- read.csv("Cities.csv")
+
+```
+
+
+Q4 - Haversine formula function 
+```{r}
+
+haversine <- function(latlong){
+  (latelong*pi/180)
+  delta_lat <- rad.lat2 - rad.lat1
+  delta_lon <- rad.lon2 - rad.lon1
+  a <- sin(delta_lat / 2)^2 + cos(rad.lat1) * cos(rad.lat2) * sin(delta_lon / 2)^2
+   c <- 2 * asin(sqrt(a)) 
+  earth_radius <- 6378137
+  distance_km <- (earth_radius * c)/1000
+  return(distance_km)
+}
+
+
+```
+
+
+Q5 - Distance between Auburn and NYC
+```{r}
+
+
+```
+
+Q6 - Distance between Auburn and all cities
+```{r}
+
+
+```
+
