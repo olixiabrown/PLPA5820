@@ -1,0 +1,108 @@
+---
+title: "CodingChallenge7"
+author: "Olivia Brown"
+date: "2025-04-03"
+output: word_document
+editor_options: 
+  chunk_output_type: console
+---
+[Link to Github](https://github.com/olixiabrown/PLPA5820) 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### Q1 - Load in required packages and dataset
+```{r}
+getwd()
+plantemergence <- read.csv("CodingChallenge7/PlantEmergence.csv")
+
+library(tidyverse)
+library(lme4)
+library(emmeans)
+library(multcompView) 
+library(multcomp)
+
+
+#turn df vectors into factors
+str(plantemergence)
+plantemergence$Treatment <- as.factor(plantemergence$Treatment)
+plantemergence$DaysAfterPlanting <- as.factor(plantemergence$DaysAfterPlanting)
+plantemergence$Rep <- as.factor(plantemergence$Rep)
+```
+
+####Q2 - lm with interaction
+```{r}
+emergence.lm <- lm(Emergence ~ Treatment*DaysAfterPlanting, data = plantemergence)
+
+summary(emergence.lm)
+anova(emergence.lm)
+
+
+```
+
+
+####Q3 - lm without interaction
+We do not need to fit the interaction term because the interactions are not statistically significant, so will use the following model for the rest of the assignment. 
+```{r}
+emergence.lm2 <- lm(Emergence ~ Treatment + DaysAfterPlanting, data = plantemergence)
+summary(emergence.lm2)
+anova(emergence.lm2)
+```
+The estimate of treatment 2 deviates from the intercept (Treatment 1) by 134.531 which is more than the estimates for all other treatments. 
+
+####Q4 - emmeans least squared test
+```{r}
+lsmeans <- emmeans(emergence.lm2, ~Treatment)
+results_lsmeans <- cld(lsmeans, alpha = 0.05, details = TRUE)
+
+```
+
+
+####Q5
+significance of letters: treatments that share a letter are not significantly different from each other and treatments that do not share a letter are significantly different from each other. treatment two is the only treatment that is significantly different from every other treatment. 
+```{r}
+plot_cldbars_onefactor <- function(emergence.lm2, factor) {
+data <- emergence.lm2$model
+variables <- colnames(emergence.lm2$model)
+dependent_var <- variables[1]
+independent_var <- variables[2:length(variables)]
+
+#estimate lsmeans
+lsmeans2 <- emmeans(emergence.lm2, as.formula(paste("~", factor))) 
+# contrast with Tukey adjustment by default
+Results_lsmeans2 <- cld(lsmeans2, alpha = 0.05, reversed = TRUE, details =
+TRUE, Letters = letters) 
+
+# Extracting the letters for the bars
+sig.diff.letters <- data.frame(Results_lsmeans2$emmeans[,1],
+str_trim(Results_lsmeans2$emmeans[,7]))
+colnames(sig.diff.letters) <- c(factor, "Letters")
+
+
+# for plotting with letters from significance test
+ave_stand2 <- emergence.lm2$model %>%
+group_by(!!sym(factor)) %>%
+dplyr::summarize(
+ave.emerge = mean(.data[[dependent_var]], na.rm = TRUE),
+se = sd(.data[[dependent_var]]) / sqrt(n())
+) %>%
+left_join(sig.diff.letters, by = factor) %>%
+mutate(letter_position = ave.emerge + 10 * se)
+
+
+plot <- ggplot(data, aes(x = !! sym(factor), y = !! sym(dependent_var))) +
+stat_summary(fun = mean, geom = "bar") +
+stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.5) +
+ylab("Number of emerged plants") +
+geom_jitter(width = 0.02, alpha = 0.5) +
+geom_text(data = ave_stand2, aes(label = Letters, y = letter_position),
+size = 5) +
+xlab(as.character(factor)) +
+theme_classic()
+
+return(plot)
+}
+
+plot_cldbars_onefactor(emergence.lm2, "Treatment")
+```
